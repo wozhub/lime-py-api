@@ -6,18 +6,17 @@ import sys
 from csv import DictReader
 
 class Api:
-    def __init__(self, hostname, user, password):
-        self._hostame = hostname
+    def __init__(self, url, user, pw):
+        self.url = url
         self._user = user
-        self._password = password
-        self.url = "http://%s/index.php/admin/remotecontrol" % hostname
+        self._password = pw
 
         data="""{   "id": 1,
                     "method": "get_session_key",
                     "params": { "username": "%s",
-                                "password": "%s" } } """ % (user, password)
+                                "password": "%s" } } """ % (user, pw)
 
-        self.session_key = self._obtenerJson(self.url,data)['result']
+        self.session_key = self._obtenerJson(data)['result']
 
 
     def _obtenerJson(self,data):
