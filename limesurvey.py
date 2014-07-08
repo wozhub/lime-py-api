@@ -28,6 +28,7 @@ class Api:
         try:
             f = urllib2.urlopen(req)
             myretun = f.read()
+            print data
             return json.loads(myretun)
 
         except:
@@ -103,14 +104,7 @@ class Api:
         data = """{ "id": 1,
                     "method": "activate_survey",
                     "params": { "sSessionKey": "%s",
-                                "SurveyID": %d } }""" % (self.session_key, sid)
-        return self._obtenerJson(data)['result']
-
-    def activate_survey(self, sid):
-        data = """{ "id": 1,
-                    "method": "activate_survey",
-                    "params": { "sSessionKey": "%s",
-                                "SurveyID": %d } }""" % (self.session_key, sid)
+                                "SurveyID": %s } }""" % (self.session_key, sid)
         return self._obtenerJson(data)['result']
 
     def import_survey(self, datos, titulo, sid):
@@ -131,19 +125,20 @@ class Api:
         return self._obtenerJson(data)['result']
 
     def export_responses(self, sid):
-        data = """ {          "method":"export_responses",
-                            "params": { "sSessionKey": "%s",
-                                        "iSurveyID":  %d,
-                                        "DocumentType": "csv",
-                                        "ResponseType": "long",
-                                        "sHeadingType": "full" },
-                            "id": 1 } """ % (self.session_key, sid)
+        data = """ {    "id" : 1,
+                        "method":"export_responses",
+                        "params": { "sSessionKey": "%s",
+                                    "iSurveyID":  %s,
+                                    "sDocumentType": "csv",
+                                    "sHeadingType": "full",
+                                    "sResponseType": "long"
+                        } } """ % (self.session_key, sid)
         return self._obtenerJson(data)['result']
 
     def _add_response(self, sid, datos):
         data = """ {          "method":"add_response",
                               "params": { "sSessionKey": "%s",
-                                          "iSurveyID": %d,
+                                          "iSurveyID": %s,
                                           "aResponseData": %s },
                             "id": 1 } """ % (self.session_key, sid, datos)
         return self._obtenerJson(data)['result']

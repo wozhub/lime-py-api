@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from limesurvey import Api
+import base64  # para encodear la subida de surveys
 
 # demo de limesurvey
 usuario = 'admin'
@@ -15,7 +16,18 @@ for e in lime.list_surveys():
 
     if propiedades['active'] == 'Y':
         print "La encuesta %s esta activa" % e[0]
-        # print lime.get_summary(e[0])
+        summary = lime.get_summary(e[0])
+
+        if summary['full_responses'] != '0':
+            print summary
+            datos = lime.export_responses(e[0])
+
+            if datos is not None:
+                decoded_string = base64.b64decode(datos)
+                print decoded_string
+
+                break
+
     else:
         print "La encuesta %s no esta activa" % e[0]
         # print lime.delete_survey(e[0])
