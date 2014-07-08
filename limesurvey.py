@@ -34,10 +34,55 @@ class Api:
             e = sys.exc_info()[0]
             print ("<p>Error: %s</p>" % e)
 
+    def delete_survey(self, sid):
+        data = """{ "id": 1,
+                    "method": "delete_survey",
+                    "params": { "sSessionKey": "%s",
+                                "iSurveyID": %s } }""" % (self.session_key,
+                                                          sid)
+        return self._obtenerJson(data)['result']
+
+    def get_survey_properties(self, sid, settings=None):
+
+        if settings is None:
+            settings = """ [
+            "sid","savetimings","allowprev","tokenanswerspersistence",
+            "showgroupinfo","showwelcome","owner_id","template","printanswers",
+            "assessments","shownoanswer","showprogress","admin","language",
+            "ipaddr","usecaptcha","showqnumcode","allowjumps","active",
+            "additional_languages","refurl","usetokens","bouncetime",
+            "navigationdelay","expires","datestamp","datecreated",
+            "bounce_email","bounceprocessing","nokeyboard","startdate",
+            "usecookie","publicstatistics","attributedescriptions",
+            "bounceaccounttype","alloweditaftercompletion","adminemail",
+            "allowregister","publicgraphs","emailresponseto",
+            "bounceaccounthost","googleanalyticsstyle","anonymized",
+            "allowsave","listpublic","emailnotificationto","bounceaccountpass",
+            "googleanalyticsapikey","faxto","autonumber_start","htmlemail",
+            "tokenlength","bounceaccountencryption","format","autoredirect",
+            "sendconfirmation","showxquestions","bounceaccountuser" ] """
+
+        data = """{ "id": 1,
+                    "method": "get_survey_properties",
+                    "params": { "sSessionKey": "%s",
+                                "iSurveyID": %s,
+                                "aSurveySettings": %s
+            } }""" % (self.session_key, sid, settings)
+        return self._obtenerJson(data)['result']
+
+    def get_summary(self, sid):
+        data = """{ "id": 1,
+                    "method": "get_summary",
+                    "params": { "sSessionKey": "%s",
+                                "iSurveyID": %s,
+                                "sStatname": "all" } }""" % (self.session_key,
+                                                             sid)
+        return self._obtenerJson(data)['result']
+
     def list_surveys(self):
         json_list_surveys = self._list_surveys()
 
-        encuestas=[]
+        encuestas = []
         for e in json_list_surveys:
             encuesta = e['sid'], e['surveyls_title']
             # Me quedo con el SID y el Titulo
@@ -52,6 +97,13 @@ class Api:
                     "method": "list_surveys",
                     "params": { "sSessionKey": "%s" } }""" % (self.session_key)
 
+        return self._obtenerJson(data)['result']
+
+    def activate_survey(self, sid):
+        data = """{ "id": 1,
+                    "method": "activate_survey",
+                    "params": { "sSessionKey": "%s",
+                                "SurveyID": %d } }""" % (self.session_key, sid)
         return self._obtenerJson(data)['result']
 
     def activate_survey(self, sid):
@@ -101,3 +153,5 @@ class Api:
 
         for r in respuestas:
             self._add_response(sid, json.dumps(r))
+
+
