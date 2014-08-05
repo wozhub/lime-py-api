@@ -27,9 +27,8 @@ class Api:
 
         try:
             f = urllib2.urlopen(req)
-            myretun = f.read()
-            print data
-            return json.loads(myretun)
+            response = f.read()
+            return json.loads(response)
 
         except:
             e = sys.exc_info()[0]
@@ -41,6 +40,15 @@ class Api:
                     "params": { "sSessionKey": "%s",
                                 "iSurveyID": %s } }""" % (self.session_key,
                                                           sid)
+        return self._obtenerJson(data)['result']
+
+    def set_survey_property(self, sid, prop, value):
+        data = """{ "id": 1,
+                    "method": "set_survey_properties",
+                    "params": { "sSessionKey": "%s",
+                                "iSurveyID": %s,
+                                "aSurveySettings": { "%s": "%s" }
+            } }""" % (self.session_key, sid, prop, value)
         return self._obtenerJson(data)['result']
 
     def get_survey_properties(self, sid, settings=None):
@@ -107,15 +115,15 @@ class Api:
                                 "SurveyID": %s } }""" % (self.session_key, sid)
         return self._obtenerJson(data)['result']
 
-    def import_survey(self, datos, titulo, sid):
+    def import_survey(self, datos, titulo, sid, tipo='lss'):
         data = """{ "id": 1,
                     "method": "import_survey",
                     "params": { "sSessionKey": "%s",
                                 "sImportData": "%s",
-                                "sImportDataType": "lss",
+                                "sImportDataType": "%s",
                                 "sNewSurveyName": "%s",
                                 "DestSurveyID": %d } }""" \
-                                % (self.session_key, datos, titulo, sid)
+                                % (self.session_key, datos, tipo, titulo, sid)
         return self._obtenerJson(data)['result']
 
     def release_session_key(self):
@@ -144,9 +152,43 @@ class Api:
         return self._obtenerJson(data)['result']
 
     def importar_desde_archivo(self, sid, archivo):
+        """Esto no funciona!"""
         respuestas = DictReader(open(archivo))
 
         for r in respuestas:
-            self._add_response(sid, json.dumps(r))
+            print self._add_response(sid, json.dumps(r))
 
+    def _list_groups(self, sid):
+        data = """ {          "method":"list_groups",
+                              "params": { "sSessionKey": "%s",
+                                          "iSurveyID": %s },
+                            "id": 1 } """ % (self.session_key, sid)
+        return self._obtenerJson(data)['result']
 
+    def list_groups(self, sid):
+        json_list_groups = self._list_groups(sid)
+
+        grupos = []
+        for g in json_list_groups:
+            grupo = g['id']['gid'], g['group_name']
+            grupos.append(grupo)
+
+        return grupos
+
+    def _list_questions(self, sid, gid):
+        data = """ {          "method":"list_questions",
+                              "params": { "sSessionKey": "%s",
+                                          "iSurveyID": %s,
+                                          "iGroupID": %s },
+                            "id": 1 } """ % (self.session_key, sid, gid)
+        return self._obtenerJson(data)['result']
+
+    def list_questions(self, sid, gid):
+        json_list_questions = self._list_questions(sid, gid)
+
+        preguntas = []
+        for q in json_list_questions:
+            pregunta = q['id']['qid'], q['question']
+            preguntas.append(pregunta)
+
+        return preguntas
