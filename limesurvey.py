@@ -1,9 +1,11 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import urllib2
 import json
 import sys
 from csv import DictReader
+from time import sleep
 
 
 class Api:
@@ -20,7 +22,6 @@ class Api:
         self.session_key = self._obtenerJson(data)['result']
 
     def _obtenerJson(self, data):
-        # print data
         req = urllib2.Request(url=self.url, data=data)
         req.add_header('content-type', 'application/json')
         req.add_header('connection', 'Keep-Alive')
@@ -144,19 +145,28 @@ class Api:
         return self._obtenerJson(data)['result']
 
     def _add_response(self, sid, datos):
-        data = """ {          "method":"add_response",
+        data = """ {          "id": 1,
+                              "method":"add_response",
                               "params": { "sSessionKey": "%s",
                                           "iSurveyID": %s,
-                                          "aResponseData": %s },
-                            "id": 1 } """ % (self.session_key, sid, datos)
+                                          "aResponseData": %s }
+                    } """ % (self.session_key, sid, datos)
         return self._obtenerJson(data)['result']
 
     def importar_desde_archivo(self, sid, archivo):
         """Esto no funciona!"""
-        respuestas = DictReader(open(archivo))
 
-        for r in respuestas:
-            print self._add_response(sid, json.dumps(r))
+        with open(archivo) as csv:
+            datos = []
+            for linea in csv.readlines():
+                datos.append(linea.rstrip().split('\t'))
+
+        columnas = datos[1]
+        for d in datos[2:]:
+            r = dict(zip(columnas, d))
+            r['id'] = ""
+            self._add_response(sid, json.dumps(r))
+            sleep(1)
 
     def _list_groups(self, sid):
         data = """ {          "method":"list_groups",
